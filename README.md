@@ -1,0 +1,4 @@
+passwdr
+=======
+
+Simple password generator
