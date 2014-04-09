@@ -31,6 +31,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <termio.h>
 #include <fcntl.h>
@@ -42,6 +43,7 @@
 using namespace std;
 
 static const char cb64[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+static const char hashword[]="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890";
 
 static void encodeblock( unsigned char *in, unsigned char *out, int len )
 {
@@ -122,7 +124,8 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    string str = string(domain) + password + "passwdr";
+    //string str = string(domain) + password + "passwdr";
+    string str = password + string(domain) + "passwdr" + string(domain);
 
     SHA1Context sha;
     uint8_t digest[20];
@@ -148,14 +151,28 @@ int main(int argc, char** argv)
 
     int i;
     string passwd = "";
-    for (i = 0; i < 18; i += 3)
+    if (false)
     {
-        unsigned char out[4];
-        encodeblock(digest + i, out, 3);
-        passwd += out[0];
-        passwd += out[1];
-        passwd += out[2];
-        passwd += out[3];
+        for (i = 0; i < 18; i += 3)
+        {
+            unsigned char out[4];
+            encodeblock(digest + i, out, 3);
+            passwd += out[0];
+            passwd += out[1];
+            passwd += out[2];
+            passwd += out[3];
+        }
+    }
+    else
+    {
+        //hashword
+        int hashcharlen = strlen(hashword);
+        for (i = 0; i < 16; i++)
+        {
+            int b = ((char)digest[i]);
+            b += 128;
+            passwd += hashword[b % hashcharlen];
+        }
     }
     printf("passwdr: %s\n", passwd.c_str());
 
